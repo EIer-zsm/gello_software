@@ -1,0 +1,23 @@
+# 临时仿真配置 - 用ur 模型测试 GELLO 主手
+robot:
+  _target_: gello.robots.sim_robot.MujocoRobotServer
+  xml_path: "third_party/mujoco_menagerie/universal_robots_ur5e/ur5e.xml"
+  gripper_xml_path: null
+  host: "127.0.0.1"
+  port: 6001
+
+agent:
+  _target_: gello.agents.gello_agent.GelloAgent
+  port: "/dev/ttyUSB0"
+  dynamixel_config:
+    _target_: gello.agents.gello_agent.DynamixelRobotConfig
+    joint_ids: [1, 2, 3, 4, 5, 6]
+    # 转换公式: degree = rad × 180 / π
+    # J1: 1.571 rad = 90.0°    J2: 3.142 rad = 180.0°   J3: -1.571 rad = -90.0°
+    # J4: 1.571 rad = 90.0°    J5: 9.425 rad = 540.0°   J6: 9.425 rad = 540.0°
+    joint_offsets: [0, 3.131, 1.571, 0, 9.425, 9.425]
+    joint_signs: [1, 1, -1, 1, 1, 1]
+    gripper_config: null
+  start_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+hz: 30

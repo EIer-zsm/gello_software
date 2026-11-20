@@ -122,6 +122,14 @@ class DynamixelRobot(Robot):
             pos = self._last_pos * (1 - self._alpha) + pos * self._alpha
             self._last_pos = pos
 
+        # 夹爪二值化：执行器（MS42DC / DO 边沿触发）只有开/闭两态，动作标签必须也是 0/1。
+        # 放在指数平滑之后，避免被平滑值污染回小数；_last_pos 仍保留连续值用于下次平滑。
+        # 阈值取行程的 1/3（自然松开 = 0，全按到底 = 1）：
+        #   gripper_config = (7, 203.8, 144.4)°，对应 203.8 - (203.8-144.4)/3 = 184.0°，
+        #   归一化后正好是 1/3，按到 1/3 就闭合，不必压到一半。
+        if self.gripper_open_close is not None:
+            pos[-1] = 1.0 if pos[-1] > 1.0 / 3.0 else 0.0
+
         return pos
 
     def command_joint_state(self, joint_state: np.ndarray) -> None:

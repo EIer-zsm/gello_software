@@ -194,7 +194,17 @@ def main():
         # Create client to communicate with hardware
         robot_client = ZMQClientRobot(port=hardware_port, host=hardware_host)
 
-    env = RobotEnv(robot_client, control_rate_hz=cfg.get("hz", 30))
+    # 相机（可选）：配置里有 camera: 就接入，字典键名默认 base
+    camera_dict = {}
+    if cfg.get("camera"):
+        camera = instantiate_from_dict(cfg["camera"])
+        camera_dict = {cfg.get("camera_name", "base"): camera}
+
+    env = RobotEnv(
+        robot_client,
+        control_rate_hz=cfg.get("hz", 30),
+        camera_dict=camera_dict,
+    )
 
     # Move robot to start_joints position if specified in config
     from gello.utils.launch_utils import move_to_start_position

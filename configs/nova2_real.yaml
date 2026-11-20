@@ -1,0 +1,35 @@
+# Nova 2 真机遥操作配置
+robot:
+  _target_: gello.robots.nova2.Nova2Robot
+  robot_ip: "192.168.37.3"
+
+agent:
+  _target_: gello.agents.gello_agent.GelloAgent
+  port: "/dev/ttyUSB0"
+  dynamixel_config:
+    _target_: gello.agents.gello_agent.DynamixelRobotConfig
+    joint_ids: [1, 2, 3, 4, 5, 6]
+    # 2026-09-22 标定: offsets=[0, 90, 450, 270, 180, 90]°
+    joint_offsets: [0.000, 1.571, 7.854, 4.712, 3.142, 1.571]
+    joint_signs: [1, 1, -1, 1, 1, 1]
+    # 夹爪: (电机ID, 完全张开角度, 完全闭合角度)，单位度
+    # 主手第 7 关节会归一化成 [0,1]：0=张开, 1=闭合，阈值 0.5 ≈ 174.1°
+    gripper_config: [7, 203.8, 144.4]
+  # 固定置位姿态，不用再改了：先跑 `python scripts/nova2_utils.py home`
+  # （→ 0 0 90 0 -90 0°），再把主手摆成同样姿态，然后启动遥操
+  # 第 7 个 0.0 = 夹爪初始期望张开
+  start_joints: [0.0000, 0.0000, 1.5708, 0.0000, -1.5708, 0.0000, 0.0]
+
+# 海康 USB 相机（1080P@30 MJPG，V4L2）。不需要相机时整块删掉即可。
+# 键名 camera_name 决定 obs / 数据集里的图像键：base -> base_rgb / base_depth
+camera:
+  _target_: gello.cameras.opencv_camera.OpenCVCamera
+  index_or_path: "/dev/video2"
+  width: 640
+  height: 480
+  fps: 30
+  fourcc: "MJPG"
+camera_name: base
+
+
+hz: 30
